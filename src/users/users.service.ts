@@ -11,21 +11,21 @@ export class UsersService {
 
   constructor(
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
-  ) {}
-  
+  ) { }
+
   async create(createUserDto: CreateUserDto) {
-    const existing = await this.usersRepo.findOne({ where : { email: createUserDto.email }});
+    const existing = await this.usersRepo.findOne({ where: { email: createUserDto.email } });
     if (existing) throw new BadRequestException('Email ya está registrado');
 
-    const passwordHash = await bcrypt.hash(createUserDto.password, 12);
+    const passwordHash = await bcrypt.hash(createUserDto.password, 10);
 
     const user = this.usersRepo.create({
-      name : createUserDto.name,
-      email : createUserDto.email, 
-      costCenter : createUserDto.costCenter, 
-      phoneNumber : createUserDto.phoneNumber, 
-      role : createUserDto.role, 
-      passwordHash, 
+      name: createUserDto.name,
+      email: createUserDto.email,
+      costCenter: createUserDto.costCenter,
+      phoneNumber: createUserDto.phoneNumber,
+      role: createUserDto.role,
+      passwordHash,
 
     });
 
@@ -41,7 +41,11 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    return await this.usersRepo.findOne({ where : { id : id } });
+    return await this.usersRepo.findOne({ where: { id: id } });
+  }
+
+  async findByEmail(email: string) {
+    return await this.usersRepo.findOne({ where: { email } });
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
@@ -49,11 +53,11 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    const user = await this.usersRepo.findOne({where :{ id : id }});
-    if( !user ){
+    const user = await this.usersRepo.findOne({ where: { id: id } });
+    if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
-      
+
     this.usersRepo.remove(user);
 
     return { message: 'Usuario eliminado correctamente' };

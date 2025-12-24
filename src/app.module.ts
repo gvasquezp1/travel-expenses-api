@@ -2,10 +2,11 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }), // lee .env  [oai_citation:4‡docs.nestjs.com](https://docs.nestjs.com/techniques/configuration?utm_source=chatgpt.com)
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -16,14 +17,14 @@ import { UsersModule } from './users/users.module';
         password: config.get('DB_PASS'),
         database: config.get('DB_NAME'),
         autoLoadEntities: true,
-        ssl: { rejectUnauthorized: false },      // 👈 clave
-        extra: { ssl: { rejectUnauthorized: false } }, // 👈 a veces necesario con pg
-
-
+        ssl: { rejectUnauthorized: false },      
+        extra: { ssl: { rejectUnauthorized: false } }, 
+        entities:[__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true, // ⚠️ solo dev
       }),
     }),
     UsersModule,
+    AuthModule,
   ],
 })
 export class AppModule { }
