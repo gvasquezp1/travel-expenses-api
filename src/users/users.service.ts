@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -49,7 +50,23 @@ export class UsersService {
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
-    return this.usersRepo.update(id, updateUserDto);
+    this.usersRepo.update(id, updateUserDto);
+    return this.usersRepo.findOne({ where: { id: id } });
+  }
+
+  async updatePassword(id: string, dto: UpdatePasswordDto) {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+
+    if (dto.currentPassword != null) {
+      const ok = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+      if (!ok) throw new BadRequestException('La contraseña actual es incorrecta');
+    }
+    const same = await bcrypt.compare(dto.newPassword, user.passwordHash);
+    if (same) throw new BadRequestException('La nueva contraseña no puede ser igual a la actual');
+
+    user.passwordHash = await bcrypt.hash(dto.newPassword, 10);
+    await this.usersRepo.save(user);
   }
 
   async remove(id: string) {
@@ -62,4 +79,6 @@ export class UsersService {
 
     return { message: 'Usuario eliminado correctamente' };
   }
+
+
 }

@@ -16,6 +16,6 @@ export class CreateUserDto {
     @IsString()
     costCenter: string;
 
-    @MinLength(8)
+    @MinLength(6)
     password: string;
 }
