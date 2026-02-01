@@ -18,10 +18,10 @@ async function bootstrap() {
     .setTitle('Viáticos API')
     .setDescription('Gestión Viáticos API')
     .setVersion('1.0')
-    .build()
+    .build();
 
-  const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('api', app, document)
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   app.enableCors({
     origin: 'http://localhost:4200',

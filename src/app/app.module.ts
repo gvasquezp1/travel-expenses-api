@@ -4,6 +4,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CostCentersModule } from './cost-center/cost-center.module';
+import { CostCenterApproverModule } from './cost-center-approver/cost-center-approver.module';
+import { TravelExpenseStatusModule } from './travel-expense-status/travel-expense-status.module';
+import { ExpenseCategoryModule } from './expense-category/expense-category.module';
 
 @Module({
   imports: [
@@ -18,15 +21,18 @@ import { CostCentersModule } from './cost-center/cost-center.module';
         password: config.get('DB_PASS'),
         database: config.get('DB_NAME'),
         autoLoadEntities: true,
-        ssl: { rejectUnauthorized: false },      
-        extra: { ssl: { rejectUnauthorized: false } }, 
-        entities:[__dirname + '/**/*.entity{.ts,.js}'],
+        ssl: { rejectUnauthorized: false },
+        extra: { ssl: { rejectUnauthorized: false } },
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true, // ⚠️ solo dev
       }),
     }),
     UsersModule,
     AuthModule,
     CostCentersModule,
+    CostCenterApproverModule,
+    TravelExpenseStatusModule,
+    ExpenseCategoryModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,13 +13,14 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class UsersService {
-
   constructor(
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
-  ) { }
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const existing = await this.usersRepo.findOne({ where: { email: createUserDto.email } });
+    const existing = await this.usersRepo.findOne({
+      where: { email: createUserDto.email },
+    });
     if (existing) throw new BadRequestException('Email ya está registrado');
 
     const passwordHash = await bcrypt.hash(createUserDto.password, 10);
@@ -27,14 +32,13 @@ export class UsersService {
       phoneNumber: createUserDto.phoneNumber,
       role: createUserDto.role,
       passwordHash,
-
+      locked: createUserDto.locked ?? false,
     });
 
     const saved = await this.usersRepo.save(user);
 
     const { passwordHash: _, ...safe } = saved;
     return safe;
-
   }
 
   findAll() {
@@ -49,9 +53,10 @@ export class UsersService {
     return await this.usersRepo.findOne({ where: { email } });
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    this.usersRepo.update(id, updateUserDto);
-    return this.usersRepo.findOne({ where: { id: id } });
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    console.log('Updating user with ID:', id, 'and data:', updateUserDto);
+    await this.usersRepo.update(id, updateUserDto);
+    return await this.usersRepo.findOne({ where: { id: id } });
   }
 
   async updatePassword(id: string, dto: UpdatePasswordDto) {
@@ -60,10 +65,14 @@ export class UsersService {
 
     if (dto.currentPassword != null) {
       const ok = await bcrypt.compare(dto.currentPassword, user.passwordHash);
-      if (!ok) throw new BadRequestException('La contraseña actual es incorrecta');
+      if (!ok)
+        throw new BadRequestException('La contraseña actual es incorrecta');
     }
     const same = await bcrypt.compare(dto.newPassword, user.passwordHash);
-    if (same) throw new BadRequestException('La nueva contraseña no puede ser igual a la actual');
+    if (same)
+      throw new BadRequestException(
+        'La nueva contraseña no puede ser igual a la actual',
+      );
 
     user.passwordHash = await bcrypt.hash(dto.newPassword, 10);
     await this.usersRepo.save(user);
@@ -79,6 +88,4 @@ export class UsersService {
 
     return { message: 'Usuario eliminado correctamente' };
   }
-
-
 }

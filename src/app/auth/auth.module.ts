@@ -8,7 +8,6 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-
 @Module({
   imports: [
     UsersModule,
@@ -18,12 +17,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '24h' }
-      })
-    })
+        signOptions: { expiresIn: '24h' },
+      }),
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy],
-  exports: [AuthService]
+  exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}
