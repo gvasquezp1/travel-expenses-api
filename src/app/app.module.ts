@@ -7,6 +7,8 @@ import { CostCentersModule } from './cost-center/cost-center.module';
 import { CostCenterApproverModule } from './cost-center-approver/cost-center-approver.module';
 import { TravelExpenseStatusModule } from './travel-expense-status/travel-expense-status.module';
 import { ExpenseCategoryModule } from './expense-category/expense-category.module';
+import { TravelExpenseModule } from './travel-expense/travel-expense.module';
+import { ExpensePaymentMethodModule } from './expense-payment-method/expense-payment-method.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { ExpenseCategoryModule } from './expense-category/expense-category.modul
     CostCenterApproverModule,
     TravelExpenseStatusModule,
     ExpenseCategoryModule,
+    TravelExpenseModule,
+    ExpensePaymentMethodModule
   ],
 })
 export class AppModule {}
