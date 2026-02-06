@@ -39,9 +39,11 @@ export class CreateTravelExpenseDto {
   categoryName: string;
 
   @IsUUID()
+  @IsOptional()
   statusId: string;
 
   @IsString()
+  @IsOptional()
   statusName: string;
 
   @IsString()
@@ -116,7 +118,7 @@ export class CreateTravelExpenseDto {
   @IsOptional()
   editedBy?: string;
 
-@IsString()
+  @IsString()
   @IsOptional()
   editedByName?: string;
 

@@ -41,10 +41,10 @@ export class TravelExpense {
   @Column()
   categoryName: string;
 
-  @Column()
+  @Column({ nullable: true })
   statusId: string;
 
-  @Column()
+  @Column({ nullable: true })
   statusName: string;
 
   @Column()

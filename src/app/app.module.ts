@@ -9,6 +9,7 @@ import { TravelExpenseStatusModule } from './travel-expense-status/travel-expens
 import { ExpenseCategoryModule } from './expense-category/expense-category.module';
 import { TravelExpenseModule } from './travel-expense/travel-expense.module';
 import { ExpensePaymentMethodModule } from './expense-payment-method/expense-payment-method.module';
+import { TextractModule } from './textract/texttract.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { ExpensePaymentMethodModule } from './expense-payment-method/expense-pay
     TravelExpenseStatusModule,
     ExpenseCategoryModule,
     TravelExpenseModule,
-    ExpensePaymentMethodModule
+    ExpensePaymentMethodModule,
+    TextractModule
   ],
 })
 export class AppModule {}
