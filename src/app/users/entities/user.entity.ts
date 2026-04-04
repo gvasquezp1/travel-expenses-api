@@ -24,11 +24,11 @@ export class User {
   @Column()
   phoneNumber: string;
 
-  @Column()
-  costCenter: string;
+  @Column({ nullable: true })
+  lineId: string;
 
   @Column()
-  role: string;
+  roleId: string;
 
   @Column({ default: false })
   locked: boolean;

@@ -1,0 +1,173 @@
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SystemModule } from './entities/system-module.entity';
+import { Permission } from './entities/permission.entity';
+
+interface PermissionSeedData {
+  name: string;
+  code: string;
+  description?: string;
+}
+
+interface ModuleSeedData {
+  name: string;
+  description: string;
+  permissions: PermissionSeedData[];
+}
+
+const SEED_DATA: ModuleSeedData[] = [
+  {
+    name: 'Usuarios',
+    description: 'Gestión de usuarios del sistema',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'usuarios.access' },
+      { name: 'Crear usuario', code: 'usuarios.create' },
+      { name: 'Editar usuario', code: 'usuarios.update' },
+      { name: 'Cambiar clave', code: 'usuarios.change_password' },
+      { name: 'Eliminar usuario', code: 'usuarios.delete' },
+    ],
+  },
+  {
+    name: 'Usuarios - Roles',
+    description: 'Gestión de roles de usuarios',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'usuarios_roles.access' },
+      { name: 'Crear role', code: 'usuarios_roles.create' },
+      { name: 'Editar role', code: 'usuarios_roles.update' },
+      { name: 'Eliminar role', code: 'usuarios_roles.delete' },
+    ],
+  },
+  {
+    name: 'Lineas',
+    description: 'Gestión de líneas de negocio',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'lineas.access' },
+      { name: 'Crear línea', code: 'lineas.create' },
+      { name: 'Editar línea', code: 'lineas.update' },
+      { name: 'Eliminar línea', code: 'lineas.delete' },
+    ],
+  },
+  {
+    name: 'Centros de costos',
+    description: 'Gestión de centros de costos',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'centros_costos.access' },
+      { name: 'Crear centro de costo', code: 'centros_costos.create' },
+      { name: 'Editar centro de costo', code: 'centros_costos.update' },
+      { name: 'Eliminar centro de costo', code: 'centros_costos.delete' },
+    ],
+  },
+  {
+    name: 'Viaticos',
+    description: 'Gestión de viáticos',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'viaticos.access' },
+      { name: 'Crear viático', code: 'viaticos.create' },
+      { name: 'Editar viático', code: 'viaticos.update' },
+      { name: 'Eliminar viático', code: 'viaticos.delete' },
+    ],
+  },
+  {
+    name: 'Topes Rol/Categoria',
+    description: 'Gestión de topes por rol y categoría',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'topes_rol.access' },
+      { name: 'Crear tope', code: 'topes_rol.create' },
+      { name: 'Editar tope', code: 'topes_rol.update' },
+      { name: 'Eliminar tope', code: 'topes_rol.delete' },
+    ],
+  },
+  {
+    name: 'Topes Solicitudes/Linea',
+    description: 'Gestión de topes de solicitudes por línea',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'topes_solicitudes.access' },
+      { name: 'Crear tope', code: 'topes_solicitudes.create' },
+      { name: 'Editar tope', code: 'topes_solicitudes.update' },
+      { name: 'Eliminar tope', code: 'topes_solicitudes.delete' },
+    ],
+  },
+  {
+    name: 'Solicitud de viaticos',
+    description: 'Gestión de solicitudes de viáticos',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'solicitud_viaticos.access' },
+      { name: 'Crear solicitud', code: 'solicitud_viaticos.create' },
+      { name: 'Editar solicitud', code: 'solicitud_viaticos.update' },
+      { name: 'Eliminar solicitud', code: 'solicitud_viaticos.delete' },
+      { name: 'Aprobar solicitud', code: 'solicitud_viaticos.approve' },
+      { name: 'Rechazar solicitud', code: 'solicitud_viaticos.reject' },
+    ],
+  },
+  {
+    name: 'Legalización',
+    description: 'Gestión de legalización de viáticos',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'legalizacion.access' },
+      { name: 'Crear legalización', code: 'legalizacion.create' },
+      { name: 'Editar legalización', code: 'legalizacion.update' },
+      { name: 'Eliminar legalización', code: 'legalizacion.delete' },
+      { name: 'Aprobar legalización', code: 'legalizacion.approve' },
+      { name: 'Rechazar legalización', code: 'legalizacion.reject' },
+    ],
+  },
+];
+
+@Injectable()
+export class PermissionSeedService implements OnApplicationBootstrap {
+  constructor(
+    @InjectRepository(SystemModule)
+    private readonly moduleRepo: Repository<SystemModule>,
+    @InjectRepository(Permission)
+    private readonly permissionRepo: Repository<Permission>,
+  ) {}
+
+  async onApplicationBootstrap() {
+    await this.seed();
+  }
+
+  async seed() {
+    let modulesCreated = 0;
+    let permissionsCreated = 0;
+
+    for (const moduleDef of SEED_DATA) {
+      let module = await this.moduleRepo.findOne({
+        where: { name: moduleDef.name },
+      });
+
+      if (!module) {
+        module = await this.moduleRepo.save(
+          this.moduleRepo.create({
+            name: moduleDef.name,
+            description: moduleDef.description,
+          }),
+        );
+        modulesCreated++;
+      }
+
+      for (const perm of moduleDef.permissions) {
+        const existing = await this.permissionRepo.findOne({
+          where: { code: perm.code },
+        });
+
+        if (!existing) {
+          await this.permissionRepo.save(
+            this.permissionRepo.create({
+              name: perm.name,
+              code: perm.code,
+              moduleId: module.id,
+            }),
+          );
+          permissionsCreated++;
+        }
+      }
+    }
+
+    return {
+      message: 'Seed completado exitosamente',
+      modulosCreados: modulesCreated,
+      permisosCreados: permissionsCreated,
+    };
+  }
+}

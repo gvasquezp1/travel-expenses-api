@@ -11,7 +11,7 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    console.log(email, password);
+    
     const user = await this.usersService.findByEmail(email);
     if (!user) {
       return null;
@@ -28,13 +28,18 @@ export class AuthService {
 
   async login(user: any): Promise<any> {
     const payload = { email: user.email, sub: user.id };
-
+    console.log('Payload for JWT:', payload);
+    console.log('User data for JWT:', user);
     return {
+      
       access_token: this.jwtService.sign(payload),
+      
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
+        roleId: user.roleId,
+        lineId: user.lineId,
       },
     };
   }

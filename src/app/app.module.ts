@@ -8,8 +8,16 @@ import { CostCenterApproverModule } from './cost-center-approver/cost-center-app
 import { TravelExpenseStatusModule } from './travel-expense-status/travel-expense-status.module';
 import { ExpenseCategoryModule } from './expense-category/expense-category.module';
 import { TravelExpenseModule } from './travel-expense/travel-expense.module';
+import { TravelExpenseRequestModule } from './travel-expense-request/travel-expense-request.module';
 import { ExpensePaymentMethodModule } from './expense-payment-method/expense-payment-method.module';
 import { TextractModule } from './textract/texttract.module';
+import { LinesModule } from './lines/lines.module';
+import { UserApproverModule } from './user-approver/user-approver.module';
+import { UserRoleModule } from './user-role/user-role.module';
+import { RoleLineLimitModule } from './role-line-limit/role-line-limit.module';
+import { LineRequestLimitModule } from './line-request-limit/line-request-limit.module';
+import { UserCostCenterModule } from './user-cost-center/user-cost-center.module';
+import { PermissionModule } from './permission/permission.module';
 
 @Module({
   imports: [
@@ -37,8 +45,16 @@ import { TextractModule } from './textract/texttract.module';
     TravelExpenseStatusModule,
     ExpenseCategoryModule,
     TravelExpenseModule,
+    TravelExpenseRequestModule,
     ExpensePaymentMethodModule,
-    TextractModule
+    TextractModule,
+    LinesModule,
+    UserApproverModule,
+    UserRoleModule,
+    RoleLineLimitModule,
+    LineRequestLimitModule,
+    UserCostCenterModule,
+    PermissionModule,
   ],
 })
 export class AppModule {}

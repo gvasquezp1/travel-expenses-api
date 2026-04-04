@@ -1,0 +1,240 @@
+{
+  "info": {
+    "name": "Travel Expense Requests API",
+    "description": "Collection for Travel Expense Requests endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Travel Expense Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"requestedForUserId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"requestedForUserName\": \"Juan Pérez\",\n  \"docDate\": \"2026-02-15\",\n  \"originCountry\": \"Colombia\",\n  \"originCity\": \"Bogotá\",\n  \"destinationCountry\": \"Estados Unidos\",\n  \"destinationCity\": \"New York\",\n  \"categoryId\": \"550e8400-e29b-41d4-a716-446655440001\",\n  \"categoryName\": \"Viáticos\",\n  \"costCenterId\": \"550e8400-e29b-41d4-a716-446655440002\",\n  \"costCenterName\": \"Ventas\",\n  \"reason\": \"Viaje de negocios a New York\",\n  \"details\": \"Reunión con clientes internacionales\",\n  \"amount\": 5000.00,\n  \"paymentMethod\": \"Tarjeta de Crédito\",\n  \"createdBy\": \"550e8400-e29b-41d4-a716-446655440003\",\n  \"createdByName\": \"Carlos López\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests"
+          ]
+        },
+        "description": "Crear una nueva solicitud de gasto de viaje"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Travel Expense Requests",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests"
+          ]
+        },
+        "description": "Obtener todas las solicitudes de gasto de viaje"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Travel Expense Request by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests/550e8400-e29b-41d4-a716-446655440010",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests",
+            "550e8400-e29b-41d4-a716-446655440010"
+          ]
+        },
+        "description": "Obtener una solicitud específica por ID"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Requests by Requested For User",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests/requested-for/550e8400-e29b-41d4-a716-446655440000",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests",
+            "requested-for",
+            "550e8400-e29b-41d4-a716-446655440000"
+          ]
+        },
+        "description": "Obtener todas las solicitudes creadas para un usuario específico"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Requests by Created By User",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests/created-by/550e8400-e29b-41d4-a716-446655440003",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests",
+            "created-by",
+            "550e8400-e29b-41d4-a716-446655440003"
+          ]
+        },
+        "description": "Obtener todas las solicitudes creadas por un usuario específico"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Requests by Cost Center",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests/cost-center/550e8400-e29b-41d4-a716-446655440002",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests",
+            "cost-center",
+            "550e8400-e29b-41d4-a716-446655440002"
+          ]
+        },
+        "description": "Obtener todas las solicitudes de un centro de costo específico"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Travel Expense Request",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 5500.00,\n  \"details\": \"Reunión con clientes internacionales - actualizado\",\n  \"docDate\": \"2026-02-16\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests/550e8400-e29b-41d4-a716-446655440010",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests",
+            "550e8400-e29b-41d4-a716-446655440010"
+          ]
+        },
+        "description": "Actualizar una solicitud de gasto de viaje existente"
+      },
+      "response": []
+    },
+    {
+      "name": "Lock Travel Expense Request",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests/550e8400-e29b-41d4-a716-446655440010/lock",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests",
+            "550e8400-e29b-41d4-a716-446655440010",
+            "lock"
+          ]
+        },
+        "description": "Bloquear una solicitud para evitar modificaciones"
+      },
+      "response": []
+    },
+    {
+      "name": "Unlock Travel Expense Request",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests/550e8400-e29b-41d4-a716-446655440010/unlock",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests",
+            "550e8400-e29b-41d4-a716-446655440010",
+            "unlock"
+          ]
+        },
+        "description": "Desbloquear una solicitud"
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Travel Expense Request",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/travel-expense-requests/550e8400-e29b-41d4-a716-446655440010",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "travel-expense-requests",
+            "550e8400-e29b-41d4-a716-446655440010"
+          ]
+        },
+        "description": "Eliminar una solicitud de gasto de viaje"
+      },
+      "response": []
+    }
+  ]
+}

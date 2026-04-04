@@ -28,9 +28,9 @@ export class UsersService {
     const user = this.usersRepo.create({
       name: createUserDto.name,
       email: createUserDto.email,
-      costCenter: createUserDto.costCenter,
+      lineId: createUserDto.lineId,
       phoneNumber: createUserDto.phoneNumber,
-      role: createUserDto.role,
+      roleId: createUserDto.roleId,
       passwordHash,
       locked: createUserDto.locked ?? false,
     });

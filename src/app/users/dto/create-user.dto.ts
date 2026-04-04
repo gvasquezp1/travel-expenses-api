@@ -15,13 +15,13 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
-  role: string;
+  roleId: string;
 
   @IsString()
   phoneNumber: string;
 
   @IsString()
-  costCenter: string;
+  lineId: string;
 
   @MinLength(6)
   password: string;
