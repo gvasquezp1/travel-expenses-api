@@ -37,6 +37,11 @@ export class UserApproverService {
   findByUserId(userId: string) {
     return this.repo.find({ where: { userId } });    
   }
+
+  async isApprover(userId: string): Promise<{ isApprover: boolean }> {
+    const count = await this.repo.count({ where: { approverUserId: userId } });
+    return { isApprover: count > 0 };
+  }
   async findOne(id: string) {
     const item = await this.repo.findOne({ where: { id } });
     if (!item) {

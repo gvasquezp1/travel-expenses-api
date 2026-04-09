@@ -23,10 +23,18 @@ export class CreateUserDto {
   @IsString()
   lineId: string;
 
+  @IsOptional()
+  @IsString()
+  cardNumber: string;
+
   @MinLength(6)
   password: string;
 
   @IsOptional()
   @IsBoolean()
   locked: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isSystemAdmin: boolean;
 }

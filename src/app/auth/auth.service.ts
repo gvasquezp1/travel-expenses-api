@@ -40,6 +40,7 @@ export class AuthService {
         name: user.name,
         roleId: user.roleId,
         lineId: user.lineId,
+        isSystemAdmin: user.isSystemAdmin ?? false,
       },
     };
   }

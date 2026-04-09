@@ -8,4 +8,8 @@ export class UpdateExpenseCategoryDto {
   @IsBoolean()
   @IsOptional()
   locked?: boolean;
+
+  @IsString()
+  @IsOptional()
+  account?: string;
 }

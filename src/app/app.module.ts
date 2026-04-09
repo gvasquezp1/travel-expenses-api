@@ -18,6 +18,11 @@ import { RoleLineLimitModule } from './role-line-limit/role-line-limit.module';
 import { LineRequestLimitModule } from './line-request-limit/line-request-limit.module';
 import { UserCostCenterModule } from './user-cost-center/user-cost-center.module';
 import { PermissionModule } from './permission/permission.module';
+import { TravelExpenseRequestDetailModule } from './travel-expense-request-detail/travel-expense-request-detail.module';
+import { BusinessPartnerModule } from './business-partner/business-partner.module';
+import { MailModule } from './mail/mail.module';
+import { TravelExpenseRequestCustomerModule } from './travel-expense-request-customer/travel-expense-request-customer.module';
+import { TravelExpenseLegalizationModule } from './travel-expense-legalization/travel-expense-legalization.module';
 
 @Module({
   imports: [
@@ -55,6 +60,11 @@ import { PermissionModule } from './permission/permission.module';
     LineRequestLimitModule,
     UserCostCenterModule,
     PermissionModule,
+    TravelExpenseRequestDetailModule,
+    BusinessPartnerModule,
+    MailModule,
+    TravelExpenseRequestCustomerModule,
+    TravelExpenseLegalizationModule,
   ],
 })
 export class AppModule {}

@@ -1,15 +1,18 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { TravelExpenseRequest } from './entities/travel-expense-request.entity';
 import { CreateTravelExpenseRequestDto } from './dto/create-travel-expense-request.dto';
 import { UpdateTravelExpenseRequestDto } from './dto/update-travel-expense-request.dto';
+import { UserApprover } from '../user-approver/entities/user-approver.entity';
 
 @Injectable()
 export class TravelExpenseRequestService {
   constructor(
     @InjectRepository(TravelExpenseRequest)
     private readonly repository: Repository<TravelExpenseRequest>,
+    @InjectRepository(UserApprover)
+    private readonly userApproverRepository: Repository<UserApprover>,
   ) {}
 
   async create(createDto: CreateTravelExpenseRequestDto): Promise<TravelExpenseRequest> {
@@ -54,6 +57,21 @@ export class TravelExpenseRequestService {
   async findByCostCenter(costCenterId: string): Promise<TravelExpenseRequest[]> {
     return await this.repository.find({
       where: { costCenterId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findByApprover(approverUserId: string): Promise<TravelExpenseRequest[]> {
+    const assignments = await this.userApproverRepository.find({
+      where: { approverUserId },
+    });
+
+    if (!assignments.length) return [];
+
+    const userIds = assignments.map((a) => a.userId);
+
+    return await this.repository.find({
+      where: { requestedForUserId: In(userIds) },
       order: { createdAt: 'DESC' },
     });
   }

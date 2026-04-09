@@ -38,7 +38,22 @@ export const FIELD_SYNONYMS: Record<string, string[]> = {
     'iva',
     'iv iva',
     'total iva',
-    'impuesto'
+    'impuesto',
+    'impuesto al consumo',
+    'Impoconsumo',
+    'impuesto consumo',
+    'impuesto al valor agregado',
+    'iva 19%',
+    'iva 5%',
+    'iva 0%'
+  ],
+  tip: [
+    'propina',
+    'propinas',
+    'total propina',
+    'total propinas',
+    'propina total',
+    'propinas total'
   ],
   total: [
     'total',

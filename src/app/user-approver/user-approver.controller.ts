@@ -27,6 +27,11 @@ export class UserApproverController {
     return this.service.findByUserId(userId);
   }
 
+  @Get('is-approver/:userId')
+  isApprover(@Param('userId') userId: string) {
+    return this.service.isApprover(userId);
+  }
+
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateUserApproverDto) {
     return this.service.update(id, dto);

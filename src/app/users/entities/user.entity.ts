@@ -33,6 +33,12 @@ export class User {
   @Column({ default: false })
   locked: boolean;
 
+  @Column({ default: false })
+  isSystemAdmin: boolean;
+
+  @Column({ nullable: true })
+  cardNumber: string;
+
   @Column()
   passwordHash: string;
 

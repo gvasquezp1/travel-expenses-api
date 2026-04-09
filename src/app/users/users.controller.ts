@@ -50,4 +50,9 @@ export class UsersController {
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
   }
+
+  @Get(':id/is-system-admin')
+  isSystemAdmin(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.usersService.isSystemAdmin(id);
+  }
 }

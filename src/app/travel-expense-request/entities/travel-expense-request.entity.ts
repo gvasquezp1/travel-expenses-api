@@ -68,6 +68,18 @@ export class TravelExpenseRequest {
   @Column({ default: false })
   locked: boolean;
 
+  @Column({ nullable: true })
+  customerId: string;
+  
+  @Column({ nullable: true })
+  customerName: string;
+
+  @Column({ nullable: true })
+  status: string;
+
+  @Column({ nullable: true, type: 'int' })
+  numberOfDays: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

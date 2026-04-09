@@ -124,12 +124,42 @@ export class TextractService {
 
     const result: Record<string, string> = {};
 
+    // Extract FORM key-value pairs
     for (const keyId in keyMap) {
       const keyBlock = keyMap[keyId];
       const valueBlock = this.findValueBlock(keyBlock, valueMap);
       const key = this.getText(keyBlock, blockMap);
       const value = this.getText(valueBlock, blockMap);
       if (key) result[key] = value;
+    }
+
+    // Extract TABLE rows as key-value pairs (col 1 = key, col 2 = value)
+    const tables = blocks.filter(b => b.BlockType === 'TABLE');
+    for (const table of tables) {
+      const cellIds: string[] = table.Relationships
+        ?.filter(r => r.Type === 'CHILD')
+        .flatMap(r => r.Ids) ?? [];
+
+      const cells = cellIds.map(id => blockMap[id]).filter(b => b?.BlockType === 'CELL');
+
+      // Group cells by row
+      const rows: Record<number, any[]> = {};
+      for (const cell of cells) {
+        const row = cell.RowIndex;
+        if (!rows[row]) rows[row] = [];
+        rows[row].push(cell);
+      }
+
+      for (const row of Object.values(rows)) {
+        const sorted = row.sort((a, b) => a.ColumnIndex - b.ColumnIndex);
+        if (sorted.length >= 2) {
+          const key = this.getText(sorted[0], blockMap).trim();
+          const value = this.getText(sorted[sorted.length - 1], blockMap).trim();
+          if (key && value && !result[key]) {
+            result[key] = value;
+          }
+        }
+      }
     }
 
     return result;

@@ -96,6 +96,7 @@ const SEED_DATA: ModuleSeedData[] = [
       { name: 'Crear solicitud', code: 'solicitud_viaticos.create' },
       { name: 'Editar solicitud', code: 'solicitud_viaticos.update' },
       { name: 'Eliminar solicitud', code: 'solicitud_viaticos.delete' },
+      { name: 'Mostrar todas las solicitudes', code: 'solicitud_viaticos.view_all' },
       { name: 'Aprobar solicitud', code: 'solicitud_viaticos.approve' },
       { name: 'Rechazar solicitud', code: 'solicitud_viaticos.reject' },
     ],

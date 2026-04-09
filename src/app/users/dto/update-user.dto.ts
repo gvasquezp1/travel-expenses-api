@@ -6,5 +6,7 @@ export class UpdateUserDto {
   @IsOptional() @IsString() phoneNumber?: string;
   @IsOptional() @IsString() lineId?: string;
   @IsOptional() @IsString() roleId?: string;
+  @IsOptional() @IsString() cardNumber?: string;
   @IsOptional() @IsBoolean() locked?: boolean;
+  @IsOptional() @IsBoolean() isSystemAdmin?: boolean;
 }

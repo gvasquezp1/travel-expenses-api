@@ -1,4 +1,4 @@
-import { IsUUID, IsString, IsDate, IsDecimal, IsOptional, IsNotEmpty, IsBoolean } from 'class-validator';
+import { IsUUID, IsString, IsDate, IsDecimal, IsOptional, IsNotEmpty, IsBoolean, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateTravelExpenseRequestDto {
@@ -79,4 +79,21 @@ paymentMethodName: string;
   @IsBoolean()
   @IsOptional()
   locked?: boolean;
+
+  @IsString()
+  @IsOptional()
+  customerId?: string;
+
+  @IsString()
+  @IsOptional()
+  customerName?: string;
+
+  @IsString()
+  @IsOptional()
+  status?: string;
+
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  numberOfDays?: number;
 }

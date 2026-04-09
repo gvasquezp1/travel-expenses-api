@@ -6,14 +6,22 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
+import type { Response as ExpressResponse } from 'express';
 import { TravelExpenseRequestService } from './travel-expense-request.service';
+import { TravelExpenseRequestExcelService } from './travel-expense-request-excel.service';
 import { CreateTravelExpenseRequestDto } from './dto/create-travel-expense-request.dto';
 import { UpdateTravelExpenseRequestDto } from './dto/update-travel-expense-request.dto';
 
 @Controller('travel-expense-requests')
 export class TravelExpenseRequestController {
-  constructor(private readonly service: TravelExpenseRequestService) {}
+  constructor(
+    private readonly service: TravelExpenseRequestService,
+    private readonly excelService: TravelExpenseRequestExcelService,
+  ) {}
 
   @Post()
   create(@Body() createDto: CreateTravelExpenseRequestDto) {
@@ -40,9 +48,25 @@ export class TravelExpenseRequestController {
     return this.service.findByCostCenter(costCenterId);
   }
 
+  @Get('approver/:approverId')
+  findByApprover(@Param('approverId', new ParseUUIDPipe()) approverId: string) {
+    return this.service.findByApprover(approverId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
+  }
+
+  @Get(':id/excel')
+  async downloadExcel(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: ExpressResponse,
+  ) {
+    const buffer = await this.excelService.generateExcel(id);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="anticipo-viaticos-${id}.xlsx"`);
+    res.end(buffer);
   }
 
   @Patch(':id')

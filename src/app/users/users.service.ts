@@ -88,4 +88,10 @@ export class UsersService {
 
     return { message: 'Usuario eliminado correctamente' };
   }
+
+  async isSystemAdmin(id: string): Promise<{ isSystemAdmin: boolean }> {
+    const user = await this.usersRepo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return { isSystemAdmin: user.isSystemAdmin };
+  }
 }
