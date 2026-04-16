@@ -23,6 +23,7 @@ import { BusinessPartnerModule } from './business-partner/business-partner.modul
 import { MailModule } from './mail/mail.module';
 import { TravelExpenseRequestCustomerModule } from './travel-expense-request-customer/travel-expense-request-customer.module';
 import { TravelExpenseLegalizationModule } from './travel-expense-legalization/travel-expense-legalization.module';
+import { TravelExpenseRequestStatusModule } from './travel-expense-request-status/travel-expense-request-status.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { TravelExpenseLegalizationModule } from './travel-expense-legalization/t
     MailModule,
     TravelExpenseRequestCustomerModule,
     TravelExpenseLegalizationModule,
+    TravelExpenseRequestStatusModule,
   ],
 })
 export class AppModule {}

@@ -36,6 +36,11 @@ export class TravelExpenseLegalizationController {
     return this.service.findByDetail(detailId);
   }
 
+  @Get('independent')
+  findIndependent() {
+    return this.service.findIndependent();
+  }
+
   @Get(':id')
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.service.findOne(id);

@@ -11,11 +11,11 @@ export class TravelExpenseLegalization {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('uuid')
-  travelExpenseRequestId: string;
+  @Column('uuid', { nullable: true })
+  travelExpenseRequestId: string | null;
 
-  @Column('uuid')
-  travelExpenseRequestDetailId: string;
+  @Column('uuid', { nullable: true })
+  travelExpenseRequestDetailId: string | null;
 
   @Column({ type: 'int' })
   dayNumber: number;
@@ -26,35 +26,44 @@ export class TravelExpenseLegalization {
   @Column()
   categoryName: string;
 
-  @Column({ nullable: true })
-  supplierNit: string;
+  @Column({ type: 'int', default: 1 })
+  categoryConsecutive: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  supplierNit: string | null;
 
   @Column()
   supplierName: string;
 
-  @Column({ nullable: true })
-  invoiceNumber: string;
+  @Column({ type: 'varchar', nullable: true })
+  invoiceNumber: string | null;
 
   @Column('decimal', { precision: 10, scale: 2 })
   invoiceAmount: number;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  taxAmount: number;
+  taxAmount: number | null;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  tipAmount: number;
+  tipAmount: number | null;
 
-  @Column({ nullable: true })
-  fileUrl: string;
-
-  @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  amountApproved: number;
+  @Column({ type: 'varchar', nullable: true })
+  fileUrl: string | null;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
-  balance: number;
+  amountApproved: number | null;
 
-  @Column({ nullable: true })
-  urlPath: string;
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  balance: number | null;
+
+  @Column({ default: false })
+  isOverAuthorized: boolean;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  exceededAmount: number | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  urlPath: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

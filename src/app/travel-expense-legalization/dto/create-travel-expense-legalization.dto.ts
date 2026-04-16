@@ -9,13 +9,13 @@ import {
 } from 'class-validator';
 
 export class CreateTravelExpenseLegalizationDto {
+  @IsOptional()
   @IsUUID()
-  @IsNotEmpty()
-  travelExpenseRequestId: string;
+  travelExpenseRequestId?: string;
 
+  @IsOptional()
   @IsUUID()
-  @IsNotEmpty()
-  travelExpenseRequestDetailId: string;
+  travelExpenseRequestDetailId?: string;
 
   @IsInt()
   @Min(1)
