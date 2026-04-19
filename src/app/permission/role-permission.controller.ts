@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { RolePermissionService } from './role-permission.service';
 import { CreateRolePermissionDto } from './dto/create-role-permission.dto';
@@ -22,7 +23,12 @@ export class RolePermissionController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Query('roleId') roleId?: string) {
+    // Si se proporciona roleId como query param, filtrar por rol
+    console.log('Query param roleId:', roleId);
+    if (roleId) {
+      return this.rolePermissionService.findByRole(roleId);
+    }
     return this.rolePermissionService.findAll();
   }
 

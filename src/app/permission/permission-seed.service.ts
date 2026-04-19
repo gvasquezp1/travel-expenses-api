@@ -1,8 +1,9 @@
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SystemModule } from './entities/system-module.entity';
 import { Permission } from './entities/permission.entity';
+import { RolePermission } from './entities/role-permission.entity';
 
 interface PermissionSeedData {
   name: string;
@@ -93,10 +94,11 @@ const SEED_DATA: ModuleSeedData[] = [
     description: 'Gestión de solicitudes de viáticos',
     permissions: [
       { name: 'Entrar al módulo', code: 'solicitud_viaticos.access' },
+      { name: 'Mostrar todas las solicitudes', code: 'solicitud_viaticos.view_all' },
+      { name: 'Autorizar solicitudes en tesorería', code: 'solicitud_viaticos.tesoreria_approve' },
       { name: 'Crear solicitud', code: 'solicitud_viaticos.create' },
       { name: 'Editar solicitud', code: 'solicitud_viaticos.update' },
       { name: 'Eliminar solicitud', code: 'solicitud_viaticos.delete' },
-      { name: 'Mostrar todas las solicitudes', code: 'solicitud_viaticos.view_all' },
       { name: 'Aprobar solicitud', code: 'solicitud_viaticos.approve' },
       { name: 'Rechazar solicitud', code: 'solicitud_viaticos.reject' },
     ],
@@ -117,11 +119,15 @@ const SEED_DATA: ModuleSeedData[] = [
 
 @Injectable()
 export class PermissionSeedService implements OnApplicationBootstrap {
+  private readonly logger = new Logger(PermissionSeedService.name);
+
   constructor(
     @InjectRepository(SystemModule)
     private readonly moduleRepo: Repository<SystemModule>,
     @InjectRepository(Permission)
     private readonly permissionRepo: Repository<Permission>,
+    @InjectRepository(RolePermission)
+    private readonly rolePermissionRepo: Repository<RolePermission>,
   ) {}
 
   async onApplicationBootstrap() {
@@ -129,6 +135,17 @@ export class PermissionSeedService implements OnApplicationBootstrap {
   }
 
   async seed() {
+    // Verificar si ya existen role_permissions
+    const existingRolePermissionsCount = await this.rolePermissionRepo.count();
+    
+    if (existingRolePermissionsCount > 0) {
+      this.logger.log(`Ya existen ${existingRolePermissionsCount} role_permissions. Saltando seed de permisos.`);
+      return {
+        message: 'Seed omitido - ya existen role_permissions',
+        rolePermissionsExistentes: existingRolePermissionsCount,
+      };
+    }
+
     let modulesCreated = 0;
     let permissionsCreated = 0;
 
@@ -138,37 +155,37 @@ export class PermissionSeedService implements OnApplicationBootstrap {
       });
 
       if (!module) {
-        module = await this.moduleRepo.save(
-          this.moduleRepo.create({
-            name: moduleDef.name,
-            description: moduleDef.description,
-          }),
-        );
+        module = this.moduleRepo.create({
+          name: moduleDef.name,
+          description: moduleDef.description,
+        });
+        await this.moduleRepo.save(module);
         modulesCreated++;
       }
 
-      for (const perm of moduleDef.permissions) {
-        const existing = await this.permissionRepo.findOne({
-          where: { code: perm.code },
+      for (const permDef of moduleDef.permissions) {
+        let permission = await this.permissionRepo.findOne({
+          where: { code: permDef.code },
         });
 
-        if (!existing) {
-          await this.permissionRepo.save(
-            this.permissionRepo.create({
-              name: perm.name,
-              code: perm.code,
-              moduleId: module.id,
-            }),
-          );
+        if (!permission) {
+          permission = this.permissionRepo.create({
+            name: permDef.name,
+            code: permDef.code,
+            description: permDef.description,
+            moduleId: module.id,
+          });
+          await this.permissionRepo.save(permission);
           permissionsCreated++;
         }
       }
     }
 
+    this.logger.log(`Seed completado. Módulos creados: ${modulesCreated}, Permisos creados: ${permissionsCreated}`);
     return {
-      message: 'Seed completado exitosamente',
-      modulosCreados: modulesCreated,
-      permisosCreados: permissionsCreated,
+      message: 'Seed completado',
+      modulesCreated,
+      permissionsCreated,
     };
   }
-}
+} 

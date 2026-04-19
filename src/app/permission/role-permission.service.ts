@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RolePermission } from './entities/role-permission.entity';
@@ -7,6 +7,8 @@ import { UpdateRolePermissionDto } from './dto/update-role-permission.dto';
 
 @Injectable()
 export class RolePermissionService {
+  private readonly logger = new Logger(RolePermissionService.name);
+
   constructor(
     @InjectRepository(RolePermission)
     private readonly rolePermissionRepo: Repository<RolePermission>,
@@ -32,11 +34,21 @@ export class RolePermissionService {
     return rp;
   }
 
-  findByRole(roleId: string) {
-    return this.rolePermissionRepo.find({
+  async findByRole(roleId: string) {
+    this.logger.log(`Buscando permisos para roleId: ${roleId}`);
+    
+    const results = await this.rolePermissionRepo.find({
       where: { roleId },
-      relations: ['permission', 'permission.module'],
+      relations: ['role', 'permission', 'permission.module'],
     });
+
+    this.logger.log(`Encontrados ${results.length} permisos para roleId: ${roleId}`);
+    
+    if (results.length > 0) {
+      this.logger.log(`Primer resultado - Role: ${results[0].role?.description}, RoleId: ${results[0].roleId}`);
+    }
+
+    return results;
   }
 
   async update(id: string, dto: UpdateRolePermissionDto) {
