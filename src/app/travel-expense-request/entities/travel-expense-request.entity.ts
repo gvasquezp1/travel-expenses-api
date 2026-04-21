@@ -11,6 +11,9 @@ export class TravelExpenseRequest {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'int', unique: true, nullable: true })
+  documentNumber: number;
+
   @Column('uuid')
   requestedForUserId: string;
 
@@ -70,7 +73,7 @@ export class TravelExpenseRequest {
 
   @Column({ nullable: true })
   customerId: string;
-  
+
   @Column({ nullable: true })
   customerName: string;
 
@@ -79,6 +82,9 @@ export class TravelExpenseRequest {
 
   @Column({ nullable: true, type: 'int' })
   numberOfDays: number;
+
+  @Column({ type: 'int', default: 0 })
+  legalizationConsecutive: number;
 
   @CreateDateColumn()
   createdAt: Date;

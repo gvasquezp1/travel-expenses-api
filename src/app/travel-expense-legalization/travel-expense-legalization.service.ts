@@ -4,19 +4,30 @@ import { IsNull, Repository } from 'typeorm';
 import { TravelExpenseLegalization } from './entities/travel-expense-legalization.entity';
 import { CreateTravelExpenseLegalizationDto } from './dto/create-travel-expense-legalization.dto';
 import { UpdateTravelExpenseLegalizationDto } from './dto/update-travel-expense-legalization.dto';
+import { TravelExpenseRequestService } from '../travel-expense-request/travel-expense-request.service';
 
 @Injectable()
 export class TravelExpenseLegalizationService {
   constructor(
     @InjectRepository(TravelExpenseLegalization)
     private readonly repo: Repository<TravelExpenseLegalization>,
+    private readonly travelExpenseRequestService: TravelExpenseRequestService,
   ) {}
 
   async create(dto: CreateTravelExpenseLegalizationDto) {
     const categoryConsecutive = await this.getNextCategoryConsecutive(dto);
     const payload = this.applyFinancialRules({ ...dto, categoryConsecutive });
     const entity = this.repo.create(payload);
-    return this.repo.save(entity);
+    const saved = await this.repo.save(entity);
+    
+    // Incrementar el consecutivo de legalización en la solicitud si está asociada
+    if (saved.travelExpenseRequestId) {
+      await this.travelExpenseRequestService.incrementLegalizationConsecutive(
+        saved.travelExpenseRequestId,
+      );
+    }
+    
+    return saved;
   }
 
   findAll() {

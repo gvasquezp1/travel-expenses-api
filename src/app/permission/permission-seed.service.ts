@@ -30,6 +30,13 @@ const SEED_DATA: ModuleSeedData[] = [
     ],
   },
   {
+    name: 'Permisos',
+    description: 'Gestión de permisos y módulos del sistema',
+    permissions: [
+      { name: 'Entrar al módulo', code: 'permisos.access' },
+    ],
+  },
+  {
     name: 'Usuarios - Roles',
     description: 'Gestión de roles de usuarios',
     permissions: [
@@ -84,9 +91,9 @@ const SEED_DATA: ModuleSeedData[] = [
     description: 'Gestión de topes de solicitudes por línea',
     permissions: [
       { name: 'Entrar al módulo', code: 'topes_solicitudes.access' },
-      { name: 'Crear tope', code: 'topes_solicitudes.create' },
-      { name: 'Editar tope', code: 'topes_solicitudes.update' },
-      { name: 'Eliminar tope', code: 'topes_solicitudes.delete' },
+      // { name: 'Crear tope', code: 'topes_solicitudes.create' },
+      // { name: 'Editar tope', code: 'topes_solicitudes.update' },
+      // { name: 'Eliminar tope', code: 'topes_solicitudes.delete' },
     ],
   },
   {
@@ -96,6 +103,8 @@ const SEED_DATA: ModuleSeedData[] = [
       { name: 'Entrar al módulo', code: 'solicitud_viaticos.access' },
       { name: 'Mostrar todas las solicitudes', code: 'solicitud_viaticos.view_all' },
       { name: 'Autorizar solicitudes en tesorería', code: 'solicitud_viaticos.tesoreria_approve' },
+      { name: 'Autorizar solicitudes en contabilidad', code: 'solicitud_viaticos.contabilidad_approve' },
+      { name: 'Ver gastos asociados a la solicitud', code: 'solicitud_viaticos.view_expenses_details' },
       { name: 'Crear solicitud', code: 'solicitud_viaticos.create' },
       { name: 'Editar solicitud', code: 'solicitud_viaticos.update' },
       { name: 'Eliminar solicitud', code: 'solicitud_viaticos.delete' },
@@ -103,18 +112,18 @@ const SEED_DATA: ModuleSeedData[] = [
       { name: 'Rechazar solicitud', code: 'solicitud_viaticos.reject' },
     ],
   },
-  {
-    name: 'Legalización',
-    description: 'Gestión de legalización de viáticos',
-    permissions: [
-      { name: 'Entrar al módulo', code: 'legalizacion.access' },
-      { name: 'Crear legalización', code: 'legalizacion.create' },
-      { name: 'Editar legalización', code: 'legalizacion.update' },
-      { name: 'Eliminar legalización', code: 'legalizacion.delete' },
-      { name: 'Aprobar legalización', code: 'legalizacion.approve' },
-      { name: 'Rechazar legalización', code: 'legalizacion.reject' },
-    ],
-  },
+  // {
+  //   name: 'Legalización',
+  //   description: 'Gestión de legalización de viáticos',
+  //   permissions: [
+  //     { name: 'Entrar al módulo', code: 'legalizacion.access' },
+  //     { name: 'Crear legalización', code: 'legalizacion.create' },
+  //     { name: 'Editar legalización', code: 'legalizacion.update' },
+  //     { name: 'Eliminar legalización', code: 'legalizacion.delete' },
+  //     { name: 'Aprobar legalización', code: 'legalizacion.approve' },
+  //     { name: 'Rechazar legalización', code: 'legalizacion.reject' },
+  //   ],
+  // },
 ];
 
 @Injectable()

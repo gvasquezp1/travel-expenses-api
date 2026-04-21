@@ -17,7 +17,14 @@ export class TravelExpenseRequestService {
 
   async create(createDto: CreateTravelExpenseRequestDto): Promise<TravelExpenseRequest> {
     try {
-      const entity = this.repository.create(createDto);
+      // Obtener el siguiente número de documento automáticamente
+      const nextDocumentNumber = await this.getNextDocumentNumber();
+      
+      const entity = this.repository.create({
+        ...createDto,
+        documentNumber: nextDocumentNumber,
+      });
+      
       return await this.repository.save(entity);
     } catch (error) {
       throw new BadRequestException('Error creating travel expense request');
@@ -81,7 +88,7 @@ export class TravelExpenseRequestService {
     updateDto: UpdateTravelExpenseRequestDto,
   ): Promise<TravelExpenseRequest> {
     const entity = await this.findOne(id);
-    
+
     if (entity.locked) {
       throw new BadRequestException('Cannot update a locked travel expense request');
     }
@@ -96,7 +103,7 @@ export class TravelExpenseRequestService {
 
   async remove(id: string): Promise<{ message: string }> {
     const entity = await this.findOne(id);
-    
+
     if (entity.locked) {
       throw new BadRequestException('Cannot delete a locked travel expense request');
     }
@@ -119,5 +126,22 @@ export class TravelExpenseRequestService {
     const entity = await this.findOne(id);
     entity.locked = false;
     return await this.repository.save(entity);
+  }
+
+  async incrementLegalizationConsecutive(id: string): Promise<number> {
+    const entity = await this.findOne(id);
+    entity.legalizationConsecutive = (entity.legalizationConsecutive || 0) + 1;
+    await this.repository.save(entity);
+    return entity.legalizationConsecutive;
+  }
+
+  private async getNextDocumentNumber(): Promise<number> {
+    const result = await this.repository
+      .createQueryBuilder('request')
+      .select('MAX(request.documentNumber)', 'max')
+      .getRawOne<{ max: string | null }>();
+    
+    const maxNumber = result?.max ? Number(result.max) : 0;
+    return maxNumber + 1;
   }
 }
