@@ -25,6 +25,8 @@ import { TravelExpenseRequestCustomerModule } from './travel-expense-request-cus
 import { TravelExpenseLegalizationModule } from './travel-expense-legalization/travel-expense-legalization.module';
 import { TravelExpenseRequestStatusModule } from './travel-expense-request-status/travel-expense-request-status.module';
 import { AppSettingsModule } from './app-settings/app-settings.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { TaxIndicatorModule } from './tax-indicator/tax-indicator.module';
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import { AppSettingsModule } from './app-settings/app-settings.module';
     TravelExpenseLegalizationModule,
     TravelExpenseRequestStatusModule,
     AppSettingsModule,
+    DashboardModule,
+    TaxIndicatorModule,
   ],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateExpenseCategoryDto {
   @IsString()
@@ -11,4 +11,12 @@ export class CreateExpenseCategoryDto {
   @IsBoolean()
   @IsOptional()
   locked?: boolean;
+
+  @IsUUID()
+  @IsOptional()
+  lineId?: string;
+
+  @IsUUID()
+  @IsOptional()
+  taxIndicatorId?: string;
 }
