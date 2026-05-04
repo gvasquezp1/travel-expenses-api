@@ -24,6 +24,7 @@ import { MailModule } from './mail/mail.module';
 import { TravelExpenseRequestCustomerModule } from './travel-expense-request-customer/travel-expense-request-customer.module';
 import { TravelExpenseLegalizationModule } from './travel-expense-legalization/travel-expense-legalization.module';
 import { TravelExpenseRequestStatusModule } from './travel-expense-request-status/travel-expense-request-status.module';
+import { AppSettingsModule } from './app-settings/app-settings.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { TravelExpenseRequestStatusModule } from './travel-expense-request-statu
     TravelExpenseRequestCustomerModule,
     TravelExpenseLegalizationModule,
     TravelExpenseRequestStatusModule,
+    AppSettingsModule,
   ],
 })
 export class AppModule {}

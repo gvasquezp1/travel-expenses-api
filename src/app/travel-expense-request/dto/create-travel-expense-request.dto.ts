@@ -96,4 +96,8 @@ paymentMethodName: string;
   @Min(1)
   @IsOptional()
   numberOfDays?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  cashWithdrawal?: boolean;
 }

@@ -15,6 +15,7 @@ import { TravelExpenseRequestService } from './travel-expense-request.service';
 import { TravelExpenseRequestExcelService } from './travel-expense-request-excel.service';
 import { CreateTravelExpenseRequestDto } from './dto/create-travel-expense-request.dto';
 import { UpdateTravelExpenseRequestDto } from './dto/update-travel-expense-request.dto';
+import { GenerateTreasuryFileDto } from './dto/generate-treasury-file.dto';
 
 @Controller('travel-expense-requests')
 export class TravelExpenseRequestController {
@@ -90,5 +91,22 @@ export class TravelExpenseRequestController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.service.remove(id);
+  }
+
+  @Post('generate-treasury-file')
+  async generateTreasuryFile(
+    @Body() dto: GenerateTreasuryFileDto,
+    @Res() res: ExpressResponse,
+  ) {
+    const fileContent = await this.service.generateTreasuryFlatFile(dto.documentNumbers);
+    
+    // Generar nombre de archivo con fecha actual
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
+    const filename = `treasury-file-${dateStr}.txt`;
+    
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(fileContent);
   }
 }

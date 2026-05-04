@@ -86,6 +86,9 @@ export class TravelExpenseRequest {
   @Column({ type: 'int', default: 0 })
   legalizationConsecutive: number;
 
+  @Column({ type: 'boolean', default: false })
+  cashWithdrawal: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 
