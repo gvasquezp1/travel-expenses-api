@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDecimal,
   IsInt,
   IsNotEmpty,
@@ -6,6 +7,7 @@ import {
   IsString,
   IsUUID,
   Min,
+  IsDateString,
 } from 'class-validator';
 
 export class CreateTravelExpenseLegalizationDto {
@@ -45,6 +47,10 @@ export class CreateTravelExpenseLegalizationDto {
   @IsNotEmpty()
   invoiceAmount: number;
 
+  @IsOptional()
+  @IsUUID()
+  taxIndicatorId?: string;
+
   @IsDecimal()
   @IsOptional()
   taxAmount?: number;
@@ -52,6 +58,10 @@ export class CreateTravelExpenseLegalizationDto {
   @IsDecimal()
   @IsOptional()
   tipAmount?: number;
+
+  @IsDecimal()
+  @IsOptional()
+  consumptionTaxAmount?: number;
 
   @IsString()
   @IsOptional()
@@ -68,4 +78,16 @@ export class CreateTravelExpenseLegalizationDto {
   @IsString()
   @IsOptional()
   urlPath?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  isApproved?: boolean;
+
+  @IsString()
+  @IsOptional()
+  approvedBy?: string;
+
+  @IsDateString()
+  @IsOptional()
+  approvedAt?: Date;
 }

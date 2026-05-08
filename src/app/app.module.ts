@@ -27,6 +27,7 @@ import { TravelExpenseRequestStatusModule } from './travel-expense-request-statu
 import { AppSettingsModule } from './app-settings/app-settings.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { TaxIndicatorModule } from './tax-indicator/tax-indicator.module';
+import { FileUploadModule } from './file-upload/file-upload.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { TaxIndicatorModule } from './tax-indicator/tax-indicator.module';
     AppSettingsModule,
     DashboardModule,
     TaxIndicatorModule,
+    FileUploadModule,
   ],
 })
 export class AppModule {}

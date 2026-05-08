@@ -41,11 +41,17 @@ export class TravelExpenseLegalization {
   @Column('decimal', { precision: 10, scale: 2 })
   invoiceAmount: number;
 
+  @Column('uuid', { nullable: true })
+  taxIndicatorId: string | null;
+
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   taxAmount: number | null;
 
   @Column('decimal', { precision: 10, scale: 2, nullable: true })
   tipAmount: number | null;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  consumptionTaxAmount: number | null;
 
   @Column({ type: 'varchar', nullable: true })
   fileUrl: string | null;
@@ -64,6 +70,15 @@ export class TravelExpenseLegalization {
 
   @Column({ type: 'varchar', nullable: true })
   urlPath: string | null;
+
+  @Column({ default: false })
+  isApproved: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  approvedBy: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  approvedAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

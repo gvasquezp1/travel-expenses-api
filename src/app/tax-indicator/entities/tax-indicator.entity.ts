@@ -19,6 +19,9 @@ export class TaxIndicator {
   @Column({ length: 255 })
   description: string;
 
+  @Column('uuid', { nullable: true })
+  lineId: string | null;
+
   @Column({ default: true })
   isActive: boolean;
 

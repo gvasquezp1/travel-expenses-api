@@ -2,6 +2,7 @@ import { Controller, Get, Post, Query, Body, Res, Req, HttpException, HttpStatus
 import type { Response, Request } from 'express';
 import { OauthAuthorizeDto } from './dto/oauth-authorize.dto';
 import { OauthTokenDto } from './dto/oauth-token.dto';
+import { OauthCallbackDto } from './dto/oauth-callback.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OauthClient } from './oauth-client.entity';
@@ -141,4 +142,79 @@ async userinfo(@Req() req: Request, @Res() res: Response) {
     isSystemAdmin: user.isSystemAdmin,
   });
 }
+
+  // NUEVO: Endpoint de callback proxy seguro
+  // Este endpoint maneja el intercambio de código por token de forma segura
+  // El frontend solo envía el código, y el backend usa sus credenciales almacenadas
+  @Post('callback')
+  async callback(@Body() body: OauthCallbackDto, @Res() res: Response) {
+    try {
+      // 1. Validar que el cliente existe
+      const client = await this.oauthClientRepo.findOne({
+        where: { clientId: body.client_id, enabled: true },
+      });
+
+      if (!client) {
+        return res.status(400).json({
+          error: 'invalid_client',
+          error_description: 'Client not found or disabled',
+        });
+      }
+
+      // 2. Obtener las credenciales del cliente desde la base de datos (seguro)
+      const clientSecret = client.clientSecret;
+
+      // 3. Validar el código de autorización
+      const codes = (global as any).oauthCodes || {};
+      const codeData = codes[body.code];
+
+      if (!codeData || codeData.clientId !== client.clientId || codeData.expires < Date.now()) {
+        return res.status(400).json({
+          error: 'invalid_grant',
+          error_description: 'Invalid or expired code',
+        });
+      }
+
+      // 4. Generar el access token directamente (sin exponer client_secret)
+      const payload = {
+        sub: codeData.userId,
+        client_id: client.clientId,
+      };
+
+      const access_token = this.jwtService.sign(payload);
+
+      // 5. Eliminar el código usado
+      delete codes[body.code];
+
+      // 6. Obtener información del usuario
+      const user = await this.usersService.findOne(codeData.userId);
+
+      if (!user) {
+        return res.status(404).json({
+          error: 'user_not_found',
+          error_description: 'User not found',
+        });
+      }
+
+      // 7. Retornar el token y la información del usuario
+      return res.json({
+        access_token,
+        token_type: 'Bearer',
+        expires_in: 3600,
+        user: {
+          sub: user.id,
+          email: user.email,
+          name: user.name,
+          roleId: user.roleId,
+          lineId: user.lineId,
+          isSystemAdmin: user.isSystemAdmin,
+        },
+      });
+    } catch (error) {
+      return res.status(500).json({
+        error: 'server_error',
+        error_description: 'An error occurred while processing the callback',
+      });
+    }
+  }
 }

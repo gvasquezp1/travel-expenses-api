@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Repository, DataSource } from 'typeorm';
 import { TravelExpenseRequest } from './entities/travel-expense-request.entity';
 import { CreateTravelExpenseRequestDto } from './dto/create-travel-expense-request.dto';
 import { UpdateTravelExpenseRequestDto } from './dto/update-travel-expense-request.dto';
@@ -13,6 +13,7 @@ export class TravelExpenseRequestService {
     private readonly repository: Repository<TravelExpenseRequest>,
     @InjectRepository(UserApprover)
     private readonly userApproverRepository: Repository<UserApprover>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(createDto: CreateTravelExpenseRequestDto): Promise<TravelExpenseRequest> {
@@ -383,5 +384,121 @@ export class TravelExpenseRequestService {
       referenceField +
       fillerField
     );
+  }
+
+  async generateSapFlatFile(documentNumbers: number[]): Promise<string> {
+    // Construir la consulta con los números de documento proporcionados
+    const documentNumbersStr = documentNumbers.map(num => `'${num}'`).join(',');
+    
+    // Primera parte del UNION - Detalles de gastos
+    const query1 = `
+      SELECT 
+        to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion,DDMY(008),BUDAT",
+        CONCAT('LEG', ter."documentNumber") AS "Referencia,C(016),XBLNR",
+        ec.description as "Texto cab.documento,C(025),BKTXT",
+        '40' as "Clave Contabilizacion,C(002),NEWBS",
+        ec.account as "Cuenta Contable,C(010),NEWKO",
+        '' as "CME,C(001),NEWUM",
+        '' as "Cuenta de mayor,C(010),HKONT",
+        tel."amountApproved" as "Importe Mon,C(020),WRBTR",
+        ti.code as "Indicador impuestos,C(002),MWSKZ",
+        '' as "Importe Impuesto,C(013),FWSTE",
+        cc."centerCode" as "Centro de costo,C(010),KOSTL",
+        '' as "ORDEN,,",
+        '' as "Centro de beneficio,C(010),PRCTR",
+        tel."supplierNit" as "Asignacion,C(018),ZUONR",
+        'Falta formula' as "Texto,C(050),SGTXT"
+      FROM travel_expense_requests ter 
+      INNER JOIN travel_expense_request_details terd ON ter.id = terd."travelExpenseRequestId" 
+      INNER JOIN travel_expense_legalizations tel ON tel."travelExpenseRequestId" = ter.id 
+        AND tel."travelExpenseRequestDetailId" = terd.id 
+      LEFT JOIN expense_category ec ON terd."categoryId" = ec.id 
+      LEFT JOIN tax_indicators ti ON ec."taxIndicatorId" = ti.id 
+      LEFT JOIN cost_centers cc ON ter."costCenterId" = cc.id 
+      WHERE ter."documentNumber" IN (${documentNumbersStr})
+      
+      UNION 
+      
+      SELECT 
+        to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion,DDMY(008),BUDAT",
+        CONCAT('LEG', ter."documentNumber") AS "Referencia,C(016),XBLNR",
+        'Gastos de viaje' as "Texto cab.documento,C(025),BKTXT",
+        '39' as "Clave Contabilizacion,C(002),NEWBS",
+        (SELECT value FROM app_settings WHERE key='cuenta_contable_archivo_sap_contrapartida') as "Cuenta Contable,C(010),NEWKO",
+        'Z' as "CME,C(001),NEWUM",
+        '' as "Cuenta de mayor,C(010),HKONT",
+        sum(tel."amountApproved") as "Importe Mon,C(020),WRBTR",
+        '' as "Indicador impuestos,C(002),MWSKZ",
+        '' as "Importe Impuesto,C(013),FWSTE",
+        '' as "Centro de costo,C(010),KOSTL",
+        '' as "ORDEN,,",
+        'E040302' as "Centro de beneficio,C(010),PRCTR",
+        '1234567' as "Asignacion,C(018),ZUONR",
+        'Falta formula' as "Texto,C(050),SGTXT"
+      FROM travel_expense_requests ter 
+      INNER JOIN travel_expense_request_details terd ON ter.id = terd."travelExpenseRequestId" 
+      INNER JOIN travel_expense_legalizations tel ON tel."travelExpenseRequestId" = ter.id 
+        AND tel."travelExpenseRequestDetailId" = terd.id 
+      WHERE ter."documentNumber" IN (${documentNumbersStr})
+      GROUP BY ter."documentNumber"
+    `;
+
+    try {
+      const results = await this.dataSource.query(query1);
+
+      if (!results || results.length === 0) {
+        throw new NotFoundException('No se encontraron datos para los números de documento proporcionados');
+      }
+
+      // Convertir los resultados a formato CSV
+      const csvContent = this.convertToCSV(results);
+      
+      return csvContent;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      throw new BadRequestException(`Error generando archivo SAP: ${errorMessage}`);
+    }
+  }
+
+  private convertToCSV(data: any[]): string {
+    if (!data || data.length === 0) {
+      return '';
+    }
+
+    // Obtener los headers de las columnas
+    const headers = Object.keys(data[0]);
+    
+    // Crear la línea de encabezados
+    const headerLine = headers.join(',');
+    
+    // Crear las líneas de datos
+    const dataLines = data.map(row => {
+      return headers.map(header => {
+        let value = row[header];
+        
+        // Manejar valores nulos o undefined
+        if (value === null || value === undefined) {
+          return '';
+        }
+        
+        // Convertir a string
+        value = String(value);
+        
+        // Si el valor contiene comas, saltos de línea o comillas, envolverlo en comillas
+        if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+          // Escapar comillas dobles duplicándolas
+          value = value.replace(/"/g, '""');
+          return `"${value}"`;
+        }
+        
+        return value;
+      }).join(',');
+    });
+    
+    // Unir todo con saltos de línea
+    return [headerLine, ...dataLines].join('\n');
   }
 }

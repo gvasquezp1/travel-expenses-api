@@ -89,6 +89,15 @@ export class TravelExpenseRequest {
   @Column({ type: 'boolean', default: false })
   cashWithdrawal: boolean;
 
+  @Column({ default: false })
+  isApproved: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  approvedBy: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  approvedAt: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

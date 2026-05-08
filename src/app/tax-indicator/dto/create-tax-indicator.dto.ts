@@ -1,4 +1,10 @@
-import { IsString, IsBoolean, IsOptional, Length } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsUUID,
+  Length,
+} from 'class-validator';
 
 export class CreateTaxIndicatorDto {
   @IsString()
@@ -8,6 +14,10 @@ export class CreateTaxIndicatorDto {
   @IsString()
   @Length(1, 255)
   description: string;
+
+  @IsOptional()
+  @IsUUID()
+  lineId?: string;
 
   @IsBoolean()
   @IsOptional()
