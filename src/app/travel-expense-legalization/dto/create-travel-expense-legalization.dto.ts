@@ -90,4 +90,8 @@ export class CreateTravelExpenseLegalizationDto {
   @IsDateString()
   @IsOptional()
   approvedAt?: Date;
+
+  @IsString()
+  @IsOptional()
+  accountingReviewNotes?: string;
 }

@@ -80,6 +80,9 @@ export class TravelExpenseLegalization {
   @Column({ type: 'timestamp', nullable: true })
   approvedAt: Date | null;
 
+  @Column({ type: 'text', nullable: true })
+  accountingReviewNotes: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

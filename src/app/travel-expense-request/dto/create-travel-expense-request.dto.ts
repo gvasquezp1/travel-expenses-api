@@ -112,4 +112,8 @@ paymentMethodName: string;
   @IsDateString()
   @IsOptional()
   approvedAt?: Date;
+
+  @IsString()
+  @IsOptional()
+  accountingReviewNotes?: string;
 }

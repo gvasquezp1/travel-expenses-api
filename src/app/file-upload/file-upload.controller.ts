@@ -50,7 +50,7 @@ export class FileUploadController {
     @Param('id') id: string,
     @Query('expiresInMinutes') expiresInMinutes?: string,
   ) {
-    const expires = expiresInMinutes ? parseInt(expiresInMinutes) : 60;
+    const expires = expiresInMinutes ? parseInt(expiresInMinutes) : 52560000;
     const signedUrl = await this.fileUploadService.getSignedUrl(id, expires);
     return { signedUrl };
   }
