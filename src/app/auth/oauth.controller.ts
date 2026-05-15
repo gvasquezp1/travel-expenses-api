@@ -10,7 +10,9 @@ import { OauthCode } from './oauth-code.entity';
 import { randomBytes } from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { Public } from './decorators/public.decorator';
 
+@Public()
 @Controller('oauth')
 export class OauthController {
   constructor(
