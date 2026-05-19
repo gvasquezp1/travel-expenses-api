@@ -1,0 +1,3 @@
+# Prevent Vercel from trying to auto-compile this TS file with esbuild
+# (NestJS decorators require tsc, not esbuild)
+api/index.ts
