@@ -1,5 +1,5 @@
 {
   "version": 2,
-  "builds": [{ "src": "src/serverless.ts", "use": "@vercel/node" }],
-  "routes": [{ "src": "/(.*)", "dest": "src/serverless.ts" }]
+  "builds": [{ "src": "dist/serverless.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "dist/serverless.js" }]
 }
