@@ -7,9 +7,10 @@ import { UserApprover } from '../user-approver/entities/user-approver.entity';
 import { TravelExpenseRequestDetail } from '../travel-expense-request-detail/entities/travel-expense-request-detail.entity';
 import { TravelExpenseRequestCustomer } from '../travel-expense-request-customer/entities/travel-expense-request-customer.entity';
 import { TravelExpenseRequestExcelService } from './travel-expense-request-excel.service';
+import { User } from '../users/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TravelExpenseRequest, UserApprover, TravelExpenseRequestDetail, TravelExpenseRequestCustomer])],
+  imports: [TypeOrmModule.forFeature([TravelExpenseRequest, UserApprover, TravelExpenseRequestDetail, TravelExpenseRequestCustomer, User])],
   controllers: [TravelExpenseRequestController],
   providers: [TravelExpenseRequestService, TravelExpenseRequestExcelService],
   exports: [TravelExpenseRequestService],

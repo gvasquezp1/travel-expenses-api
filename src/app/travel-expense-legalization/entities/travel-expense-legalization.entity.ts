@@ -83,6 +83,12 @@ export class TravelExpenseLegalization {
   @Column({ type: 'text', nullable: true })
   accountingReviewNotes: string | null;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  city: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  municipality: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

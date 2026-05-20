@@ -116,15 +116,15 @@ export class TravelExpenseRequestController {
     @Body() dto: GenerateSapFileDto,
     @Res() res: ExpressResponse,
   ) {
-    const fileContent = await this.service.generateSapFlatFile(dto.documentNumbers);
+    const buffer = await this.service.generateSapFlatFile(dto.documentNumbers);
     
     // Generar nombre de archivo con fecha actual
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
-    const filename = `sap-file-${dateStr}.csv`;
+    const filename = `sap-file-${dateStr}.xlsx`;
     
-    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(fileContent);
+    res.send(buffer);
   }
 }

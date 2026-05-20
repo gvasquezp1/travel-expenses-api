@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
   Min,
   IsDateString,
 } from 'class-validator';
@@ -94,4 +95,14 @@ export class CreateTravelExpenseLegalizationDto {
   @IsString()
   @IsOptional()
   accountingReviewNotes?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(100)
+  city?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(100)
+  municipality?: string;
 }

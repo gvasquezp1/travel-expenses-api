@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import * as ExcelJS from 'exceljs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, DataSource } from 'typeorm';
 import { TravelExpenseRequest } from './entities/travel-expense-request.entity';
@@ -386,61 +387,179 @@ export class TravelExpenseRequestService {
     );
   }
 
-  async generateSapFlatFile(documentNumbers: number[]): Promise<string> {
+  async generateSapFlatFile(documentNumbers: number[]): Promise<Buffer> {
     // Construir la consulta con los números de documento proporcionados
     const documentNumbersStr = documentNumbers.map(num => `'${num}'`).join(',');
     
     // Primera parte del UNION - Detalles de gastos
     const query1 = `
-      SELECT 
-        to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion,DDMY(008),BUDAT",
-        CONCAT('LEG', ter."documentNumber") AS "Referencia,C(016),XBLNR",
-        ec.description as "Texto cab.documento,C(025),BKTXT",
-        '40' as "Clave Contabilizacion,C(002),NEWBS",
-        ec.account as "Cuenta Contable,C(010),NEWKO",
-        '' as "CME,C(001),NEWUM",
-        '' as "Cuenta de mayor,C(010),HKONT",
-        tel."amountApproved" as "Importe Mon,C(020),WRBTR",
-        ti.code as "Indicador impuestos,C(002),MWSKZ",
-        '' as "Importe Impuesto,C(013),FWSTE",
-        cc."centerCode" as "Centro de costo,C(010),KOSTL",
-        '' as "ORDEN,,",
-        '' as "Centro de beneficio,C(010),PRCTR",
-        tel."supplierNit" as "Asignacion,C(018),ZUONR",
-        'Falta formula' as "Texto,C(050),SGTXT"
-      FROM travel_expense_requests ter 
-      INNER JOIN travel_expense_request_details terd ON ter.id = terd."travelExpenseRequestId" 
-      INNER JOIN travel_expense_legalizations tel ON tel."travelExpenseRequestId" = ter.id 
-        AND tel."travelExpenseRequestDetailId" = terd.id 
-      LEFT JOIN expense_category ec ON terd."categoryId" = ec.id 
-      LEFT JOIN tax_indicators ti ON ec."taxIndicatorId" = ti.id 
-      LEFT JOIN cost_centers cc ON ter."costCenterId" = cc.id 
-      WHERE ter."documentNumber" IN (${documentNumbersStr})
-      
-      UNION 
-      
-      SELECT 
-        to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion,DDMY(008),BUDAT",
-        CONCAT('LEG', ter."documentNumber") AS "Referencia,C(016),XBLNR",
-        'Gastos de viaje' as "Texto cab.documento,C(025),BKTXT",
-        '39' as "Clave Contabilizacion,C(002),NEWBS",
-        (SELECT value FROM app_settings WHERE key='cuenta_contable_archivo_sap_contrapartida') as "Cuenta Contable,C(010),NEWKO",
-        'Z' as "CME,C(001),NEWUM",
-        '' as "Cuenta de mayor,C(010),HKONT",
-        sum(tel."amountApproved") as "Importe Mon,C(020),WRBTR",
-        '' as "Indicador impuestos,C(002),MWSKZ",
-        '' as "Importe Impuesto,C(013),FWSTE",
-        '' as "Centro de costo,C(010),KOSTL",
-        '' as "ORDEN,,",
-        'E040302' as "Centro de beneficio,C(010),PRCTR",
-        '1234567' as "Asignacion,C(018),ZUONR",
-        'Falta formula' as "Texto,C(050),SGTXT"
-      FROM travel_expense_requests ter 
-      INNER JOIN travel_expense_request_details terd ON ter.id = terd."travelExpenseRequestId" 
-      INNER JOIN travel_expense_legalizations tel ON tel."travelExpenseRequestId" = ter.id 
-        AND tel."travelExpenseRequestDetailId" = terd.id 
-      WHERE ter."documentNumber" IN (${documentNumbersStr})
-      GROUP BY ter."documentNumber"
+      WITH detalle AS (
+        SELECT
+          to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion DDMY(008) BUDAT",
+          CONCAT('LEG', ter."documentNumber") AS "Referencia C(016) XBLNR",
+          ec.description AS "Texto cab.documento C(025) BKTXT",
+          '40' AS "Clave Contabilizacion C(002) NEWBS",
+          ec.account AS "Cuenta ContableC(010) NEWKO",
+          '' AS "CME C(001) NEWUM",
+          '' AS "Cuenta de mayor C(010) HKONT",
+          tel."amountApproved" - tel."taxAmount" - tel."consumptionTaxAmount" AS "Importe Mon C(020) WRBTR",
+          ti.code AS "Indicador impuestos C(002) MWSKZ",
+          '' AS "Importe Impuesto C(013) FWSTE",
+          cc."centerCode" AS "Centro de costo C(010) KOSTL",
+          '' AS "ORDEN",
+          '' AS "Centro de beneficio,C(010) PRCTR",
+          tel."supplierNit" AS "Asignacion C(018) ZUONR",
+          UPPER(CONCAT(tel."invoiceNumber",' ',ec.description,' ', tel.city, ' ', tel.municipality, ' ', ter."createdByName")) AS "Texto C(050) SGTXT"
+        FROM travel_expense_requests ter
+        INNER JOIN travel_expense_request_details terd ON ter.id = terd."travelExpenseRequestId"
+        INNER JOIN travel_expense_legalizations tel ON tel."travelExpenseRequestId" = ter.id
+          AND tel."travelExpenseRequestDetailId" = terd.id
+        LEFT JOIN expense_category ec ON terd."categoryId" = ec.id
+        LEFT JOIN tax_indicators ti ON tel."taxIndicatorId" = ti.id
+        LEFT JOIN cost_centers cc ON ter."costCenterId" = cc.id
+        WHERE ter."documentNumber" IN (${documentNumbersStr})
+
+        UNION
+
+        SELECT
+          to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion DDMY(008) BUDAT",
+          CONCAT('LEG', ter."documentNumber") AS "Referencia C(016) XBLNR",
+          'IMPOCONSUMO' AS "Texto cab.documento C(025) BKTXT",
+          '40' AS "Clave Contabilizacion C(002) NEWBS",
+          (SELECT value FROM app_settings WHERE key = 'cuenta_contable_archivo_sap_impoconsumo') AS "Cuenta Contable,C(010),NEWKO",
+          '' AS "CME C(001) NEWUM",
+          '' AS "Cuenta de mayor C(010) HKONT",
+          tel."consumptionTaxAmount" AS "Importe Mon C(020) WRBTR",
+          ti.code AS "Indicador impuestos C(002) MWSKZ",
+          '' AS "Importe Impuesto C(013) FWSTE",
+          cc."centerCode" AS "Centro de costo C(010) KOSTL",
+          '' AS "ORDEN",
+          '' AS "Centro de beneficio C(010) PRCTR",
+          tel."supplierNit" AS "Asignacion C(018) ZUONR",
+          UPPER(CONCAT(tel."invoiceNumber",' ',ec.description,' ', tel.city, ' ', tel.municipality, ' ', ter."createdByName")) AS "Texto C(050) SGTXT"
+        FROM travel_expense_requests ter
+        INNER JOIN travel_expense_request_details terd ON ter.id = terd."travelExpenseRequestId"
+        INNER JOIN travel_expense_legalizations tel ON tel."travelExpenseRequestId" = ter.id
+          AND tel."travelExpenseRequestDetailId" = terd.id
+        LEFT JOIN expense_category ec ON terd."categoryId" = ec.id
+        LEFT JOIN tax_indicators ti ON tel."taxIndicatorId" = ti.id
+        LEFT JOIN cost_centers cc ON ter."costCenterId" = cc.id
+        WHERE ter."documentNumber" IN (${documentNumbersStr})
+
+        UNION
+
+        SELECT
+          to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion DDMY(008) BUDAT",
+          CONCAT('LEG', ter."documentNumber") AS "Referencia C(016) XBLNR",
+          'PROPINAS' AS "Texto cab.documento C(025) BKTXT",
+          '40' AS "Clave Contabilizacion C(002) NEWBS",
+          (SELECT value FROM app_settings WHERE key = 'cuenta_contable_archivo_sap_propinas') AS "Cuenta Contable,C(010),NEWKO",
+          '' AS "CME C(001) NEWUM",
+          '' AS "Cuenta de mayor C(010) HKONT",
+          COALESCE(tel."tipAmount", 0.00) AS "Importe Mon C(020) WRBTR",
+          ti.code AS "Indicador impuestos C(002) MWSKZ",
+          '' AS "Importe Impuesto C(013) FWSTE",
+          cc."centerCode" AS "Centro de costo C(010) KOSTL",
+          '' AS "ORDEN",
+          '' AS "Centro de beneficio C(010) PRCTR",
+          tel."supplierNit" AS "Asignacion C(018) ZUONR",
+          UPPER(CONCAT(tel."invoiceNumber",' ',ec.description,' ', tel.city, ' ', tel.municipality, ' ', ter."createdByName")) AS "Texto C(050) SGTXT"
+        FROM travel_expense_requests ter
+        INNER JOIN travel_expense_request_details terd ON ter.id = terd."travelExpenseRequestId"
+        INNER JOIN travel_expense_legalizations tel ON tel."travelExpenseRequestId" = ter.id
+          AND tel."travelExpenseRequestDetailId" = terd.id
+        LEFT JOIN expense_category ec ON terd."categoryId" = ec.id
+        LEFT JOIN tax_indicators ti ON tel."taxIndicatorId" = ti.id
+        LEFT JOIN cost_centers cc ON ter."costCenterId" = cc.id
+        WHERE ter."documentNumber" IN (${documentNumbersStr})
+
+        UNION
+
+        SELECT
+          to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion DDMY(008) BUDAT",
+          CONCAT('LEG', ter."documentNumber") AS "Referencia C(016) XBLNR",
+          'GRAVAMENT A LOS MOVIMIENTOS FINANCIEROS' AS "Texto cab.documento C(025) BKTXT",
+          '40' AS "Clave Contabilizacion C(002) NEWBS",
+          COALESCE((SELECT value FROM app_settings WHERE key = 'cuenta_contable_archivo_sap_gravamen_financiero'), '0') AS "Cuenta Contable,C(010),NEWKO",
+          '' AS "CME C(001) NEWUM",
+          '' AS "Cuenta de mayor C(010) HKONT",
+          COALESCE(SUM(tel."amountApproved" - tel."taxAmount" - tel."consumptionTaxAmount" - tel."tipAmount"), 0)
+            * COALESCE((SELECT value FROM app_settings WHERE key = 'gravamen_a_los_movimientos_financieros_porcentaje')::NUMERIC / 1000, 0) AS "Importe Mon C(020) WRBTR",
+          ti.code AS "Indicador impuestos C(002) MWSKZ",
+          '' AS "Importe Impuesto C(013) FWSTE",
+          cc."centerCode" AS "Centro de costo C(010) KOSTL",
+          '' AS "ORDEN",
+          '' AS "Centro de beneficio C(010) PRCTR",
+          tel."supplierNit" AS "Asignacion C(018) ZUONR",
+          UPPER(CONCAT(tel."invoiceNumber",' ',ec.description,' ', tel.city, ' ', tel.municipality, ' ', ter."createdByName")) AS "Texto C(050) SGTXT"
+        FROM travel_expense_requests ter
+        INNER JOIN travel_expense_request_details terd ON ter.id = terd."travelExpenseRequestId"
+        INNER JOIN travel_expense_legalizations tel ON tel."travelExpenseRequestId" = ter.id
+          AND tel."travelExpenseRequestDetailId" = terd.id
+        LEFT JOIN expense_category ec ON terd."categoryId" = ec.id
+        LEFT JOIN tax_indicators ti ON tel."taxIndicatorId" = ti.id
+        LEFT JOIN cost_centers cc ON ter."costCenterId" = cc.id
+        WHERE ter."documentNumber" IN (${documentNumbersStr})
+        GROUP BY tel.id, ter."documentNumber", ti.code, cc."centerCode", tel."supplierNit",
+                 tel."invoiceNumber", ec.description, tel.city, tel.municipality, ter."createdByName"
+
+        UNION
+
+        SELECT
+          to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion DDMY(008) BUDAT",
+          CONCAT('LEG', ter."documentNumber") AS "Referencia C(016) XBLNR",
+          'COMISIONES BANCARIAS' AS "Texto cab.documento C(025) BKTXT",
+          '40' AS "Clave Contabilizacion C(002) NEWBS",
+          (SELECT value FROM app_settings WHERE key = 'cuenta_contable_archivo_sap_comision_por_retiro') AS "Cuenta Contable,C(010),NEWKO",
+          '' AS "CME C(001) NEWUM",
+          '' AS "Cuenta de mayor C(010) HKONT",
+          CASE
+            WHEN ter."cashWithdrawal" = FALSE
+            THEN (SELECT value FROM app_settings WHERE key = 'comision_por_retiro')::NUMERIC
+            ELSE 0
+          END AS "Importe Mon C(020) WRBTR",
+          ti.code AS "Indicador impuestos C(002) MWSKZ",
+          '' AS "Importe Impuesto C(013) FWSTE",
+          cc."centerCode" AS "Centro de costo C(010) KOSTL",
+          '' AS "ORDEN",
+          '' AS "Centro de beneficio C(010) PRCTR",
+          tel."supplierNit" AS "Asignacion C(018) ZUONR",
+          UPPER(CONCAT(tel."invoiceNumber",' ',ec.description,' ', tel.city, ' ', tel.municipality, ' ', ter."createdByName")) AS "Texto C(050) SGTXT"
+        FROM travel_expense_requests ter
+        INNER JOIN travel_expense_request_details terd ON ter.id = terd."travelExpenseRequestId"
+        INNER JOIN travel_expense_legalizations tel ON tel."travelExpenseRequestId" = ter.id
+          AND tel."travelExpenseRequestDetailId" = terd.id
+        LEFT JOIN expense_category ec ON terd."categoryId" = ec.id
+        LEFT JOIN tax_indicators ti ON tel."taxIndicatorId" = ti.id
+        LEFT JOIN cost_centers cc ON ter."costCenterId" = cc.id
+        WHERE ter."documentNumber" IN (${documentNumbersStr})
+        GROUP BY ter."cashWithdrawal", tel.id, ter."documentNumber", ti.code, cc."centerCode",
+                 tel."supplierNit", tel."invoiceNumber", ec.description, tel.city, tel.municipality, ter."createdByName"
+      ),
+      resultado AS (
+        SELECT * FROM detalle
+
+        UNION ALL
+
+        SELECT
+          to_char(now(), 'DD/MM/YYYY') AS "Fe.contabilizacion DDMY(008) BUDAT",
+          CONCAT('LEG', (SELECT REPLACE(MAX("Referencia C(016) XBLNR"), 'LEG', '') FROM detalle)) AS "Referencia C(016) XBLNR",
+          'GASTOS DE VIAJE' AS "Texto cab.documento C(025) BKTXT",
+          '39' AS "Clave Contabilizacion C(002) NEWBS",
+          (SELECT value FROM app_settings WHERE key = 'cuenta_contable_archivo_sap_contrapartida') AS "Cuenta ContableC(010) NEWKO",
+          'Z' AS "CME C(001) NEWUM",
+          '' AS "Cuenta de mayor C(010) HKONT",
+          SUM("Importe Mon C(020) WRBTR")::NUMERIC AS "Importe Mon C(020) WRBTR",
+          '' AS "Indicador impuestos C(002) MWSKZ",
+          '' AS "Importe Impuesto C(013) FWSTE",
+          '' AS "Centro de costo C(010) KOSTL",
+          '' AS "ORDEN",
+          (SELECT MAX("Centro de costo C(010) KOSTL") FROM detalle) AS "Centro de beneficio,C(010) PRCTR",
+          '' AS "Asignacion C(018) ZUONR",
+          CONCAT('LEG.ANT.', (SELECT REPLACE(MAX("Referencia C(016) XBLNR"), 'LEG', '') FROM detalle)) AS "Texto C(050) SGTXT"
+        FROM detalle
+      )
+      SELECT * FROM resultado res WHERE res."Importe Mon C(020) WRBTR">0
     `;
 
     try {
@@ -450,10 +569,7 @@ export class TravelExpenseRequestService {
         throw new NotFoundException('No se encontraron datos para los números de documento proporcionados');
       }
 
-      // Convertir los resultados a formato CSV
-      const csvContent = this.convertToCSV(results);
-      
-      return csvContent;
+      return await this.convertToExcel(results);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -463,42 +579,34 @@ export class TravelExpenseRequestService {
     }
   }
 
-  private convertToCSV(data: any[]): string {
-    if (!data || data.length === 0) {
-      return '';
+  private async convertToExcel(data: Record<string, unknown>[]): Promise<Buffer> {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('SAP');
+
+    if (data.length > 0) {
+      const headers = Object.keys(data[0]);
+
+      // Header row
+      const headerRow = sheet.addRow(headers);
+      headerRow.eachCell(cell => {
+        cell.font = { bold: true };
+      });
+
+      // Data rows
+      for (const row of data) {
+        sheet.addRow(headers.map(h => row[h] ?? ''));
+      }
+
+      // Auto-fit column widths
+      sheet.columns.forEach((col, i) => {
+        const maxLength = Math.max(
+          headers[i].length,
+          ...data.map(row => String(row[headers[i]] ?? '').length),
+        );
+        col.width = Math.min(maxLength + 2, 60);
+      });
     }
 
-    // Obtener los headers de las columnas
-    const headers = Object.keys(data[0]);
-    
-    // Crear la línea de encabezados
-    const headerLine = headers.join(',');
-    
-    // Crear las líneas de datos
-    const dataLines = data.map(row => {
-      return headers.map(header => {
-        let value = row[header];
-        
-        // Manejar valores nulos o undefined
-        if (value === null || value === undefined) {
-          return '';
-        }
-        
-        // Convertir a string
-        value = String(value);
-        
-        // Si el valor contiene comas, saltos de línea o comillas, envolverlo en comillas
-        if (value.includes(',') || value.includes('\n') || value.includes('"')) {
-          // Escapar comillas dobles duplicándolas
-          value = value.replace(/"/g, '""');
-          return `"${value}"`;
-        }
-        
-        return value;
-      }).join(',');
-    });
-    
-    // Unir todo con saltos de línea
-    return [headerLine, ...dataLines].join('\n');
+    return Buffer.from(await workbook.xlsx.writeBuffer());
   }
 }

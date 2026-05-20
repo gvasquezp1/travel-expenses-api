@@ -5,6 +5,7 @@ import * as ExcelJS from 'exceljs';
 import { TravelExpenseRequest } from './entities/travel-expense-request.entity';
 import { TravelExpenseRequestDetail } from '../travel-expense-request-detail/entities/travel-expense-request-detail.entity';
 import { TravelExpenseRequestCustomer } from '../travel-expense-request-customer/entities/travel-expense-request-customer.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class TravelExpenseRequestExcelService {
@@ -15,15 +16,18 @@ export class TravelExpenseRequestExcelService {
     private readonly detailRepo: Repository<TravelExpenseRequestDetail>,
     @InjectRepository(TravelExpenseRequestCustomer)
     private readonly customerRepo: Repository<TravelExpenseRequestCustomer>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
   ) {}
 
   async generateExcel(id: string): Promise<Buffer> {
     const request = await this.requestRepo.findOne({ where: { id } });
     if (!request) throw new NotFoundException(`Travel expense request ${id} not found`);
 
-    const [details, customers] = await Promise.all([
+    const [details, customers, createdByUser] = await Promise.all([
       this.detailRepo.find({ where: { travelExpenseRequestId: id }, order: { createdAt: 'ASC' } }),
       this.customerRepo.find({ where: { travelExpenseRequestId: id }, order: { createdAt: 'ASC' } }),
+      this.userRepo.findOne({ where: { id: request.createdBy }, select: ['cardNumber'] }),
     ]);
 
     const workbook = new ExcelJS.Workbook();
@@ -126,7 +130,9 @@ export class TravelExpenseRequestExcelService {
     const infoRow5 = sheet.getRow(rowIdx++);
     setLabel(infoRow5, 1, 'Motivo:');
     setValue(infoRow5, 2, request.reason);
-    sheet.mergeCells(infoRow5.number, 2, infoRow5.number, 8);
+    sheet.mergeCells(infoRow5.number, 2, infoRow5.number, 4);
+    setLabel(infoRow5, 5, 'No. Tarjeta:');
+    setValue(infoRow5, 6, createdByUser?.cardNumber ?? '');
 
     rowIdx++; // blank
 
