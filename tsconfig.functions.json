@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.build.json",
+  "include": [
+    "src/functions/**/*.ts",
+    "src/serverless-handler.ts"
+  ],
+  "exclude": ["node_modules"]
+}

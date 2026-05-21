@@ -1,4 +1,5 @@
 {
   "version": 2,
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/handler" }]
+  "builds": [{ "src": "src/serverless.ts", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "src/serverless.ts" }]
 }

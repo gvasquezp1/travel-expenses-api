@@ -1,0 +1,17 @@
+node_modules
+src
+test
+api
+.git
+.github
+.vercel
+*.md
+*.log
+tsconfig*.json
+webpack*.js
+nest-cli.json
+eslint.config.mjs
+.prettierrc
+.env*
+local.settings.json
+Travel-Expense-Requests.postman_collection.json

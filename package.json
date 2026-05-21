@@ -5,8 +5,11 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "main": "dist/functions/httpTrigger.js",
   "scripts": {
     "build": "nest build",
+    "build:azure": "nest build --webpack --webpackPath webpack.azure.js",
+    "func:start": "npm run build:azure && func start",
     "build:serverless": "nest build --webpack --webpackPath webpack.serverless.js",
     "vercel-build": "npm run build:serverless",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -24,6 +27,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.981.0",
     "@aws-sdk/client-textract": "^3.980.0",
+    "@azure/functions": "^4.15.0",
     "@azure/storage-blob": "^12.31.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",

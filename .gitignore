@@ -5,6 +5,9 @@
 api/handler.js
 api/handler.js.map
 
+# Azure Functions local settings (contains secrets)
+local.settings.json
+
 # Logs
 logs
 *.log
