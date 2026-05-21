@@ -45,7 +45,7 @@ import { FileUploadModule } from './file-upload/file-upload.module';
         ssl: { rejectUnauthorized: false },
         extra: { ssl: { rejectUnauthorized: false } },
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true
+        synchronize: false
       }),
     }),
     UsersModule,
