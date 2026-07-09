@@ -27,6 +27,14 @@ export class CreateUserDto {
   @IsString()
   cardNumber: string;
 
+  @IsOptional()
+  @IsString()
+  sapCode: string;
+
+  @IsOptional()
+  @IsString()
+  documentNumber: string;
+
   @MinLength(6)
   password: string;
 

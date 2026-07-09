@@ -9,10 +9,6 @@ export class UpdateExpenseCategoryDto {
   @IsOptional()
   locked?: boolean;
 
-  @IsString()
-  @IsOptional()
-  account?: string;
-
   @IsUUID()
   @IsOptional()
   lineId?: string;

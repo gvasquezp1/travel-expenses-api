@@ -33,6 +33,10 @@ export class UsersService {
       roleId: createUserDto.roleId,
       passwordHash,
       locked: createUserDto.locked ?? false,
+      sapCode: createUserDto.sapCode,
+      documentNumber: createUserDto.documentNumber,
+      cardNumber: createUserDto.cardNumber,
+      isSystemAdmin: createUserDto.isSystemAdmin ?? false,
     });
 
     const saved = await this.usersRepo.save(user);

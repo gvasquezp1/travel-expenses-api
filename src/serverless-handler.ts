@@ -4,8 +4,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
 
-import { AppModule } from 'src/app/app.module';
-import { JwtAuthGuard } from 'src/app/auth/guards/jwt-auth.guard';
+import { AppModule } from './app/app.module'; 
+import { JwtAuthGuard } from './app/auth/guards/jwt-auth.guard'; 
 
 const expressApp = express();
 let appInitialized = false;

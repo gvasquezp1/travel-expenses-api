@@ -47,4 +47,10 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  sapCode: string;
+
+  @Column({ nullable: true })
+  documentNumber: string;
 }

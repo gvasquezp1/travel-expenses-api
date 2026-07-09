@@ -546,7 +546,9 @@ export class TravelExpenseRequestService {
           CONCAT('LEG', (SELECT REPLACE(MAX("Referencia C(016) XBLNR"), 'LEG', '') FROM detalle)) AS "Referencia C(016) XBLNR",
           'GASTOS DE VIAJE' AS "Texto cab.documento C(025) BKTXT",
           '39' AS "Clave Contabilizacion C(002) NEWBS",
-          (SELECT value FROM app_settings WHERE key = 'cuenta_contable_archivo_sap_contrapartida') AS "Cuenta ContableC(010) NEWKO",
+          (select u."documentNumber"  from users u where id in (
+      select ter."requestedForUserId"  from travel_expense_requests ter 
+      where cast(ter."legalizationConsecutive" as varchar) = (SELECT REPLACE(MAX("Referencia C(016) XBLNR"), 'LEG', '') FROM detalle)) limit 1) AS "Cuenta ContableC(010) NEWKO",
           'Z' AS "CME C(001) NEWUM",
           '' AS "Cuenta de mayor C(010) HKONT",
           SUM("Importe Mon C(020) WRBTR")::NUMERIC AS "Importe Mon C(020) WRBTR",

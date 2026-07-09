@@ -9,4 +9,6 @@ export class UpdateUserDto {
   @IsOptional() @IsString() cardNumber?: string;
   @IsOptional() @IsBoolean() locked?: boolean;
   @IsOptional() @IsBoolean() isSystemAdmin?: boolean;
+  @IsOptional() @IsString() sapCode?: string;
+  @IsOptional() @IsString() documentNumber?: string;
 }

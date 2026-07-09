@@ -10,9 +10,6 @@ export class ExpenseCategory {
   @Column()
   description: string;
 
-  @Column({ nullable: true })
-  account: string;
-
   @Column({ default: false })
   locked: boolean;
 
