@@ -2,7 +2,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import express from 'express';
+import express, { json, urlencoded } from 'express';
 
 import { AppModule } from '../src/app/app.module';
 import { JwtAuthGuard } from '../src/app/auth/guards/jwt-auth.guard';
@@ -16,7 +16,11 @@ async function bootstrap() {
     const app = await NestFactory.create(
       AppModule,
       new ExpressAdapter(expressServer),
+      { bodyParser: false },
     );
+
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ limit: '50mb', extended: true }));
 
     app.useGlobalPipes(
       new ValidationPipe({
